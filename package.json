@@ -1,0 +1,21 @@
+{
+  "name": "thematic-models",
+  "version": "1.0.0",
+  "description": "Models for thematic classification",
+  "main": "runWord2Vec.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "8.2.0",
+    "path": "0.12.7",
+    "natural": "2.1.5",
+    "lemmatizer": "0.0.1",
+    "stopwords": "0.0.9",
+    "word2vec": "1.1.2",
+    "xmlbuilder": "15.1.1"
+  }
+}
