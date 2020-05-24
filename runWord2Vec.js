@@ -3,16 +3,16 @@ const Word2Vec = require('./Word2Vec/Word2Vec');
 const createXml = require('./createXml');
 
 let CORPUS_DATA = {};
-let WORD2VEC_MODEL = new Word2Vec({ size: 300 });
+let WORD2VEC_MODEL = new Word2Vec({ size: 300, minCount: 0 });
 
 run = async () => {
     await runProcessingCorpus();
-    WORD2VEC_MODEL.fit(CORPUS_DATA.lemmasFilePath, getFittingResult);
+    WORD2VEC_MODEL.fit(CORPUS_DATA.tokensFilePath, getFittingResult);
 };
 
 runProcessingCorpus = async () => {
     try {
-        CORPUS_DATA = await processCorpus();
+        CORPUS_DATA = await processCorpus(true);
         printStats();
     } catch (err) {
         console.error(err);
@@ -23,7 +23,7 @@ runProcessingCorpus = async () => {
 printStats = () => {
     console.log(
         `- Documents: ${CORPUS_DATA.documentsList.length}` +
-        `\n- Words: ${CORPUS_DATA.lemmas.length}` +
+        `\n- Words count: ${CORPUS_DATA.tokens.reduce((accum, doc) => accum += doc.length, 0)}` +
         `\n- Vocabulary size: ${CORPUS_DATA.vocabulary.length}`
     );
 };
@@ -45,6 +45,7 @@ runLoadedModel = async (error, model) => {
     }
     console.log('Model stats:', model);
     WORD2VEC_MODEL.setModel(model);
+    WORD2VEC_MODEL.updateModelParams({ silent: true });
 
     console.log('Save contexts words...');
     const contextMap = calculateContextMap();
@@ -56,10 +57,10 @@ runLoadedModel = async (error, model) => {
 
 calculateContextMap = () => {
     let wordContextMap = new Map();
-    CORPUS_DATA.vocabulary.forEach(lemma => {
+    CORPUS_DATA.vocabulary.forEach(word => {
         wordContextMap.set(
-            lemma,
-            WORD2VEC_MODEL.getMostSimilarWords(lemma)
+            word,
+            WORD2VEC_MODEL.getMostSimilarWords(word)
         );
     });
 

@@ -103,7 +103,7 @@ class PLSA {
                         console.log(`Document-topic probability = ${this.#docTopicProb[docIndex]}`);
                         console.log(`Topic-word probability = ${topicsForWord}`);
                         console.log(`Topic probability = ${prob}`);
-                        console.log('Exiting...');
+                        console.log('Exiting...\n');
                         return this.createJSONObjectFromVectors();
                     }
                     this.#topicProb[docIndex][wordIndex] = this.normalize(prob);

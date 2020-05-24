@@ -33,6 +33,10 @@ class Word2Vec {
         );
     }
 
+    updateModelParams(newParams) {
+        if (newParams) this.#modelParams = {...this.#modelParams, ...newParams};
+    }
+
     loadModel(callback) { w2v.loadModel(this.#modelPath, callback) }
 
     setModel(newModel) { this.#model = newModel }

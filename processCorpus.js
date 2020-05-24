@@ -15,7 +15,7 @@ const tokenizer = new natural.WordTokenizer();
 const REDUNDANT_FILE_NAMES = ['.DS_Store'];
 const NUMBER_REG_EXP = /\d+/g;
 
-readCorpus = async () => {
+readCorpus = async (isWord2VecProcessing = false) => {
     try {
         const documentsList = removeRedundantDocuments(
             await getFilesListFromCorpus(corpusFolder)
@@ -28,8 +28,12 @@ readCorpus = async () => {
             createVocabularySet(tokens)
         );
 
-        // console.log('Save processed lemmas to file...');
-        // const lemmasFilePath = await saveProcessedLemmasToFile(lemmas);
+        if (isWord2VecProcessing) {
+            console.log('Save processed lemmas to file...');
+            const tokensFilePath = await saveProcessedLemmasToFile(tokens);
+
+            return {documentsList, tokens, vocabulary, tokensFilePath};
+        }
 
         return {documentsList, tokens, vocabulary};
     } catch (err) {
@@ -82,13 +86,16 @@ getNormalizedTokensFromDocuments = async (
     }
 };
 
-// saveProcessedLemmasToFile = async (lemmas) => {
-//     const lemmasText = lemmas.join(' ');
-//     const pathToSave = modelsPath + 'lemmas.txt';
-//     await writeDataToFile(pathToSave, lemmasText);
-//
-//     return pathToSave;
-// };
+saveProcessedLemmasToFile = async (tokens) => {
+    let strTokens = '';
+    tokens.forEach(doc => {
+        strTokens += (doc.join(' ') + '\n')
+    });
+    const pathToSave = modelsPath + 'tokens.txt';
+    await writeDataToFile(pathToSave, strTokens);
+
+    return pathToSave;
+};
 
 
 module.exports = readCorpus;
