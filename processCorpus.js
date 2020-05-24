@@ -13,6 +13,7 @@ const createVocabularySet = require('./helpers/vocabularyHelper');
 const tokenizer = new natural.WordTokenizer();
 
 const REDUNDANT_FILE_NAMES = ['.DS_Store'];
+const NUMBER_REG_EXP = /\d+/g;
 
 readCorpus = async () => {
     try {
@@ -66,6 +67,7 @@ getNormalizedTokensFromDocuments = async (
             const docTokens = tokenizer.tokenize(dataFromFile);
             tokens.push(
                 docTokens
+                    .filter(token => !token.match(NUMBER_REG_EXP))
                     .map(token => lemmatizer(token.toLowerCase()))
                     .filter(lemma =>
                         stopwords.english.indexOf(lemma) === -1
