@@ -1,5 +1,3 @@
-const { writeDataToFile } = require('../helpers/filesHelper');
-
 class PLSA {
     #wordsDocs;
     #vocabulary;
@@ -21,7 +19,10 @@ class PLSA {
 
         this.initArrayWithValue = (n, value) => {
             let array = new Array(n);
-            for (let i = 0; i < n; i++) array[i] = !value ? 0 : value;
+            for (let i = 0; i < n; i++) 
+                array[i] = value === undefined 
+                    ? Math.random()
+                    : value;
 
             return array;
         };
@@ -46,7 +47,7 @@ class PLSA {
 
         this.normalize = (vector) => {
             const sumComponents = vector.reduce((accum, elem) => accum += elem, 0);
-            if (!sumComponents) return vector;
+            if (sumComponents === 0) return vector;
 
             return vector.map(elem => elem * 1.0 / sumComponents);
         };
@@ -80,9 +81,9 @@ class PLSA {
         }
 
         /** Initialize counter arrays */
-        this.#docTopicProb = this.initMatrixWithValue(docsCount, topicsCount, 1);
-        this.#topicWordProb = this.initMatrixWithValue(topicsCount, vocSize, 1);
-        this.#topicProb = this.initThreeDimMatrixWithValue(docsCount, vocSize, topicsCount, 1);
+        this.#docTopicProb = this.initMatrixWithValue(docsCount, topicsCount, undefined);
+        this.#topicWordProb = this.initMatrixWithValue(topicsCount, vocSize, undefined);
+        this.#topicProb = this.initThreeDimMatrixWithValue(docsCount, vocSize, topicsCount, undefined);
 
         /** Run EM-algorithm */
         for (let iteration = 0; iteration < maxCountIterations; iteration++) {
@@ -121,10 +122,10 @@ class PLSA {
                     }
 
                     this.#topicWordProb[topicIndex][wordIndex] = sum;
-                    this.#topicWordProb[topicIndex] = this.normalize(
-                        this.#topicWordProb[topicIndex]
-                    );
                 }
+                this.#topicWordProb[topicIndex] = this.normalize(
+                    this.#topicWordProb[topicIndex]
+                );
             }
 
             /** Update P(topic | document) */
@@ -137,10 +138,10 @@ class PLSA {
                     }
 
                     this.#docTopicProb[docIndex][topicIndex] = sum;
-                    this.#docTopicProb[docIndex] = this.normalize(
-                        this.#docTopicProb[docIndex]
-                    );
                 }
+                this.#docTopicProb[docIndex] = this.normalize(
+                    this.#docTopicProb[docIndex]
+                );
             }
         }
 

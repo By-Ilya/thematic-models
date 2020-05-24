@@ -16,7 +16,7 @@ run = async () => {
             CORPUS_DATA.vocabulary,
             CORPUS_DATA.documentsList
         );
-        const wordVectors = pLSAModel.pLSA(1000);
+        const wordVectors = pLSAModel.pLSA(100);
         
         console.log('Save contexts words...');
         const contextMap = calculateContextMap(wordVectors);
