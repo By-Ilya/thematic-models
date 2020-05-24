@@ -19,18 +19,18 @@ readCorpus = async () => {
         const documentsList = removeRedundantDocuments(
             await getFilesListFromCorpus(corpusFolder)
         );
-        const tokens = await getTokensFromDocuments(
+        const tokens = await getNormalizedTokensFromDocuments(
             corpusFolder, documentsList
         );
-        const lemmas = getLemmasFromTokens(tokens);
+
         const vocabulary = Array.from(
-            createVocabularySet(lemmas)
+            createVocabularySet(tokens)
         );
 
-        console.log('Save processed lemmas to file...');
-        const lemmasFilePath = await saveProcessedLemmasToFile(lemmas);
+        // console.log('Save processed lemmas to file...');
+        // const lemmasFilePath = await saveProcessedLemmasToFile(lemmas);
 
-        return {documentsList, lemmas, vocabulary, lemmasFilePath};
+        return {documentsList, tokens, vocabulary};
     } catch (err) {
         throw err;
     }
@@ -53,7 +53,9 @@ removeRedundantDocuments = documentsList => {
     );
 };
 
-getTokensFromDocuments = async (corpusDirectory, documentsList) => {
+getNormalizedTokensFromDocuments = async (
+    corpusDirectory, documentsList
+) => {
     console.log('Getting tokens from documents...');
     let tokens = [];
     try {
@@ -61,38 +63,30 @@ getTokensFromDocuments = async (corpusDirectory, documentsList) => {
             const dataFromFile = await readDataFromFile(
                 corpusDirectory + fileName
             );
-            tokens = tokens.concat(
-                tokenizer.tokenize(dataFromFile)
+            const docTokens = tokenizer.tokenize(dataFromFile);
+            tokens.push(
+                docTokens
+                    .map(token => lemmatizer(token.toLowerCase()))
+                    .filter(lemma =>
+                        stopwords.english.indexOf(lemma) === -1
+                    )
+                    .filter(lemma => lemma.length > 1)
             );
         }
 
-        return tokens.map(t => {
-            return t.toLowerCase();
-        });
+        return tokens;
     } catch (err) {
         throw err;
     }
 };
 
-getLemmasFromTokens = tokens => {
-    console.log('Getting lemmas from tokens without stop words and single character words...');
-    return tokens
-        .map(token => lemmatizer(token))
-        .filter(lemma =>
-            stopwords.english.indexOf(lemma) === -1
-        )
-        .filter(lemma =>
-            lemma.length > 1
-        );
-};
-
-saveProcessedLemmasToFile = async (lemmas) => {
-    const lemmasText = lemmas.join(' ');
-    const pathToSave = modelsPath + 'lemmas.txt';
-    await writeDataToFile(pathToSave, lemmasText);
-
-    return pathToSave;
-};
+// saveProcessedLemmasToFile = async (lemmas) => {
+//     const lemmasText = lemmas.join(' ');
+//     const pathToSave = modelsPath + 'lemmas.txt';
+//     await writeDataToFile(pathToSave, lemmasText);
+//
+//     return pathToSave;
+// };
 
 
 module.exports = readCorpus;

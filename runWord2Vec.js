@@ -50,6 +50,7 @@ runLoadedModel = async (error, model) => {
     const contextMap = calculateContextMap();
     await createXml('word2vec.contextWords', contextMap);
     console.log('Contexts words was saved successfully!');
+    
     process.exit(0);
 };
 

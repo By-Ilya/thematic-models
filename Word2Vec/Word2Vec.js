@@ -33,25 +33,15 @@ class Word2Vec {
         );
     }
 
-    loadModel(callback) {
-        w2v.loadModel(this.#modelPath, callback);
-    }
+    loadModel(callback) { w2v.loadModel(this.#modelPath, callback) }
 
-    setModel(newModel) {
-        this.#model = newModel;
-    }
+    setModel(newModel) { this.#model = newModel }
 
-    getMostSimilarWords(word) {
-        return this.#model.mostSimilar(word, countContextWords);
-    }
+    getMostSimilarWords(word) { return this.#model.mostSimilar(word, countContextWords) }
 
-    getSimilarity(word1, word2) {
-        return this.#model.similarity(word1, word2);
-    }
+    getSimilarity(word1, word2) { return this.#model.similarity(word1, word2) }
 
-    setPathToSavedModel(directory, modelName) {
-        this.#modelPath = path.resolve(modelsPath + modelName);
-    }
+    setPathToSavedModel(directory, modelName) { this.#modelPath = path.resolve(modelsPath + modelName) }
 }
 
 

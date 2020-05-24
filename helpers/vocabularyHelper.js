@@ -1,7 +1,8 @@
-createVocabularySet = (wordsList) => {
+createVocabularySet = (wordsDocsList) => {
     let vocabularySet = new Set();
-    wordsList.forEach(word => {
-        vocabularySet.add(word);
+
+    wordsDocsList.forEach(doc => {
+        doc.forEach(word => vocabularySet.add(word));
     });
 
     return vocabularySet;
