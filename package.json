@@ -16,6 +16,7 @@
     "lemmatizer": "0.0.1",
     "stopwords": "0.0.9",
     "word2vec": "1.1.2",
-    "xmlbuilder": "15.1.1"
+    "xmlbuilder": "15.1.1",
+    "csv-parser": "2.3.2"
   }
 }

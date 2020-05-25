@@ -6,3 +6,7 @@ package-lock.json
 corpus
 models
 output-data
+
+wordSim353/plsaComparison.csv
+wordSim353/word2vecComparison.csv
+wordSim353/goldStandard.csv

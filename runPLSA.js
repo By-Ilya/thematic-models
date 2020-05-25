@@ -1,8 +1,12 @@
 const processCorpus = require('./processCorpus');
 const PLSA = require('./PLSA/PLSA');
 const cosineSimilarity = require('./helpers/cosineSimilarity');
-const { countContextWords } = require('./config');
 const createXml = require('./createXml');
+
+const fs = require('fs');
+const csv = require('csv-parser');
+const {lemmatizer} = require('lemmatizer');
+const {writeDataToFile} = require('./helpers/filesHelper');
 
 let CORPUS_DATA = {};
 
@@ -23,7 +27,12 @@ run = async () => {
         await createXml('PLSA.contextWords', contextMap);
         console.log('Contexts words was saved successfully!');
 
-        process.exit(0);
+        console.log('Start comparison with WordSim353');
+        const goldStandart = [];
+        fs.createReadStream('./wordSim353/goldStandard.csv')
+            .pipe(csv())
+            .on('data', data => goldStandart.push(data))
+            .on('end', () => startComparison(goldStandart, contextMap));
     } catch (err) {
         console.error(err);
         process.exit(0);
@@ -56,7 +65,7 @@ calculateContextMap = (wordVectors) => {
 
         contextMap.set(
             wordVectors[wordIndex].word,
-            context.sort(contextSimilaritySortRule).slice(0, countContextWords)
+            context.sort(contextSimilaritySortRule)
         );
     }
 
@@ -64,6 +73,60 @@ calculateContextMap = (wordVectors) => {
 }
 
 contextSimilaritySortRule = (a, b) => b.dist - a.dist;
+
+startComparison = async (goldStandart, contextMap) => {
+    let normalizedGoldStandart = goldStandart.map(wordObj => {
+        return {
+            word1: wordObj.word1,
+            word2: wordObj.word2,
+            similarity: wordObj.similarity / 10,
+            plsaSimilarity: 0
+        };
+    });
+
+    const goldStandartWithPLSA = normalizedGoldStandart.map(goldObj => {
+        let wordContext = contextMap.get(lemmatizer(goldObj.word1));
+        if (wordContext) {
+            wordContext.forEach(ctxObj => {
+                if (ctxObj.word === lemmatizer(goldObj.word2)) {
+                    goldObj.plsaSimilarity = ctxObj.dist;
+                }
+            });
+        }
+
+        wordContext = contextMap.get(goldObj.word2);
+        if (wordContext) {
+            wordContext.forEach(ctxObj => {
+                if (
+                    ctxObj.word === lemmatizer(goldObj.word1) &&
+                    ctxObj.dist > goldObj.similarity
+                ) {
+                    goldObj.plsaSimilarity = ctxObj.dist;
+                }
+            });
+        }
+        
+        return goldObj;
+    });
+
+    const csvFilePath = './wordSim353/plsaComparison.csv';
+    await writeComparisonInFile(
+        csvFilePath,
+        goldStandartWithPLSA
+    );
+    
+    console.log(`Comparison was written in file: ${csvFilePath}`);
+    process.exit(0);
+}
+
+writeComparisonInFile = async (filePath, comparison) => {
+    let strToWrite = 'word1,word2,goldSimilarity,plsaSimilarity\n';
+    comparison.forEach(cmpObj => {
+        strToWrite += `${cmpObj.word1},${cmpObj.word2},${cmpObj.similarity},${cmpObj.plsaSimilarity}\n`;
+    });
+
+    await writeDataToFile(filePath, strToWrite);
+}
 
 
 run();

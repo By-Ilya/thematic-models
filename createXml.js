@@ -5,7 +5,7 @@ const {
     createXmlWord
 } = require('./helpers/xmlHelper');
 
-const { outputFolder } = require('./config');
+const { countContextWords, outputFolder } = require('./config');
 
 createXmlFile = async (documentName, wordContextMap) => {
     console.log(`Create XML file with contexts...`);
@@ -13,9 +13,15 @@ createXmlFile = async (documentName, wordContextMap) => {
 
     for (let [word, context] of wordContextMap) {
         let xmlContext = createXmlContext(xmlRoot, word);
+
+        let index = 0;
         if (context !== null) {
-            context.forEach(wordObject => {
-                createXmlWord(xmlContext, wordObject);
+            context.every(wordObject => {
+                if (index < countContextWords) {
+                    createXmlWord(xmlContext, wordObject);
+                    index++;
+                    return true;
+                } else return false;
             });
         }
     }
